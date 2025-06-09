@@ -217,6 +217,18 @@ npm run build
 # 启动生产环境
 npm run start
 ```
+### 使用 Docker 打包
+1. 构建镜像
+```bash
+docker build -t chat-app .
+```
+2. 运行容器
+```bash
+docker run -p 3001:3001 chat-app
+```
+
+如果需要自定义环境变量，可在构建前修改 `server/.env` 和 `client/.env`.
+
 
 ## 📄 许可证
 
