@@ -1,0 +1,69 @@
+import { PrismaClient } from '@prisma/client'
+
+declare global {
+  var __prisma: PrismaClient | undefined
+}
+
+// Prevent multiple instances of Prisma Client in development
+const prisma = globalThis.__prisma || new PrismaClient({
+  log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+})
+
+if (process.env.NODE_ENV === 'development') {
+  globalThis.__prisma = prisma
+}
+
+export { prisma }
+
+export async function initializeDatabase() {
+  try {
+    // Test the connection
+    await prisma.$connect()
+    console.log('✅ Database connected successfully')
+    
+    // Run any initialization logic here
+    await createDefaultAdmin()
+    
+  } catch (error) {
+    console.error('❌ Database connection failed:', error)
+    throw error
+  }
+}
+
+async function createDefaultAdmin() {
+  try {
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@chatapp.com'
+    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123456'
+    
+    // Check if admin user already exists
+    const existingAdmin = await prisma.user.findUnique({
+      where: { email: adminEmail }
+    })
+    
+    if (!existingAdmin) {
+      const bcrypt = await import('bcryptjs')
+      const hashedPassword = await bcrypt.hash(adminPassword, 12)
+      
+      await prisma.user.create({
+        data: {
+          email: adminEmail,
+          username: 'admin',
+          displayName: 'Administrator',
+          password: hashedPassword,
+          isAdmin: true,
+          isVerified: true,
+        }
+      })
+      
+      console.log('✅ Default admin user created')
+      console.log(`📧 Admin email: ${adminEmail}`)
+      console.log(`🔑 Admin password: ${adminPassword}`)
+    }
+  } catch (error) {
+    console.error('❌ Failed to create default admin:', error)
+  }
+}
+
+export async function disconnectDatabase() {
+  await prisma.$disconnect()
+}

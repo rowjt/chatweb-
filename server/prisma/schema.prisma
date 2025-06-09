@@ -1,0 +1,209 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  username    String   @unique
+  displayName String
+  password    String
+  avatar      String?
+  bio         String?
+  isOnline    Boolean  @default(false)
+  lastSeen    DateTime @default(now())
+  isAdmin     Boolean  @default(false)
+  isVerified  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  sentMessages     Message[]           @relation("MessageSender")
+  chatParticipants ChatParticipant[]
+  messageReactions MessageReaction[]
+  ownedGroups      Group[]             @relation("GroupOwner")
+  notifications    Notification[]
+  userSessions     UserSession[]
+
+  @@map("users")
+}
+
+model Chat {
+  id          String   @id @default(cuid())
+  type        ChatType @default(DIRECT)
+  name        String?
+  description String?
+  avatar      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  participants ChatParticipant[]
+  messages     Message[]
+  group        Group?
+
+  @@map("chats")
+}
+
+model ChatParticipant {
+  id          String           @id @default(cuid())
+  chatId      String
+  userId      String
+  role        ParticipantRole  @default(MEMBER)
+  permissions Json?
+  joinedAt    DateTime         @default(now())
+  leftAt      DateTime?
+
+  // Relations
+  chat Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([chatId, userId])
+  @@map("chat_participants")
+}
+
+model Message {
+  id          String      @id @default(cuid())
+  chatId      String
+  senderId    String
+  content     String
+  type        MessageType @default(TEXT)
+  replyToId   String?
+  isEdited    Boolean     @default(false)
+  isDeleted   Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  chat        Chat                @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  sender      User                @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  replyTo     Message?            @relation("MessageReply", fields: [replyToId], references: [id])
+  replies     Message[]           @relation("MessageReply")
+  attachments MessageAttachment[]
+  reactions   MessageReaction[]
+
+  @@map("messages")
+}
+
+model MessageAttachment {
+  id        String @id @default(cuid())
+  messageId String
+  type      String
+  name      String
+  url       String
+  size      Int
+  mimeType  String
+  thumbnail String?
+
+  // Relations
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@map("message_attachments")
+}
+
+model MessageReaction {
+  id        String   @id @default(cuid())
+  messageId String
+  userId    String
+  emoji     String
+  createdAt DateTime @default(now())
+
+  // Relations
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId, emoji])
+  @@map("message_reactions")
+}
+
+model Group {
+  id          String      @id @default(cuid())
+  chatId      String      @unique
+  name        String
+  description String?
+  avatar      String?
+  type        GroupType   @default(PRIVATE)
+  maxMembers  Int         @default(100)
+  ownerId     String
+  settings    Json?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  chat  Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  owner User @relation("GroupOwner", fields: [ownerId], references: [id])
+
+  @@map("groups")
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  content   String
+  data      Json?
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model UserSession {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  userAgent String?
+  ipAddress String?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_sessions")
+}
+
+// Enums
+enum ChatType {
+  DIRECT
+  GROUP
+}
+
+enum ParticipantRole {
+  MEMBER
+  ADMIN
+  OWNER
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  FILE
+  AUDIO
+  VIDEO
+  SYSTEM
+}
+
+enum GroupType {
+  PUBLIC
+  PRIVATE
+}
+
+enum NotificationType {
+  MESSAGE
+  MENTION
+  GROUP_INVITE
+  SYSTEM
+}
