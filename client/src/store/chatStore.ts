@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { Chat, Message, User } from '../../../shared/types'
+import { Chat, Message } from '../../../shared/types'
 import { chatService } from '../services/chatService'
 
 interface ChatState {
@@ -36,7 +36,7 @@ interface ChatActions {
   addMessage: (message: Message) => void
   updateMessage: (message: Message) => void
   removeMessage: (messageId: string) => void
-  updateChat: (chat: Chat) => void
+  applyChatUpdate: (chat: Chat) => void
 
   // Typing indicators
   setTyping: (chatId: string, userId: string, isTyping: boolean) => void
@@ -145,7 +145,7 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
 
   sendMessage: async (chatId: string, content: string, attachments?: File[]) => {
     try {
-      const message = await chatService.sendMessage(chatId, {
+      await chatService.sendMessage(chatId, {
         content,
         type: 'text',
         attachments
@@ -228,7 +228,7 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
     })
   },
 
-  updateChat: (chat: Chat) => {
+  applyChatUpdate: (chat: Chat) => {
     set(state => ({
       chats: state.chats.map(c => c.id === chat.id ? chat : c),
       currentChat: state.currentChat?.id === chat.id ? chat : state.currentChat

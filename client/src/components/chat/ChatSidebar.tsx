@@ -6,14 +6,14 @@ import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Separator } from '@/components/ui/separator'
+// import { Separator } from '@/components/ui/separator'
 import { 
   Search, 
   Plus, 
   Settings, 
   MessageSquare,
   Users,
-  MoreVertical
+  // MoreVertical
 } from 'lucide-react'
 import { formatTime, getInitials } from '@/lib/utils'
 

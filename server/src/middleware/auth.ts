@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
 import { prisma } from '../config/database'
-import { User } from '@prisma/client'
 
 export interface AuthRequest extends Request {
-  user?: User
+  // Use a loose type here to avoid dependency on generated Prisma types
+  user?: any
 }
 
 export const authMiddleware = async (
