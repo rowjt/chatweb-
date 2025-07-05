@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import { Routes, Route, Link, useLocation } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Badge } from '@/components/ui/badge'
+// The following components are currently unused but kept for future
+// admin interface enhancements.
+// import { Button } from '@/components/ui/button'
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+// import { Badge } from '@/components/ui/badge'
 import { 
   Users, 
   MessageSquare, 
@@ -26,7 +28,8 @@ const mockStats = {
 }
 
 export default function AdminPage() {
-  const [stats, setStats] = useState(mockStats)
+  // Stats state will be updated once API integration is implemented
+  const [stats] = useState(mockStats)
   const location = useLocation()
 
   useEffect(() => {

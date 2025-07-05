@@ -1,5 +1,5 @@
 import { io, Socket } from 'socket.io-client'
-import { Message, User, Chat, SocketEvents } from '../../../shared/types'
+import { Message, User, Chat } from '../../../shared/types'
 
 class SocketService {
   private socket: Socket | null = null

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Separator } from '@/components/ui/separator'
+// import { Separator } from '@/components/ui/separator'
 import { 
   Send, 
   Paperclip, 
@@ -22,7 +22,7 @@ export default function ChatWindow() {
   const { user } = useAuthStore()
   const { currentChat, messages, sendMessage, loading } = useChatStore()
   const [messageText, setMessageText] = useState('')
-  const [isTyping, setIsTyping] = useState(false)
+  // const [isTyping, setIsTyping] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -201,9 +201,7 @@ export default function ChatWindow() {
                           </span>
                           {isFromCurrentUser && (
                             <span className="text-xs opacity-70">
-                              {message.status === 'sent' && '✓'}
-                              {message.status === 'delivered' && '✓✓'}
-                              {message.status === 'read' && '✓✓'}
+                              {/* message delivery status could be rendered here */}
                             </span>
                           )}
                         </div>
