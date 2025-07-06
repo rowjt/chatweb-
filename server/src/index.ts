@@ -9,8 +9,8 @@ import dotenv from 'dotenv'
 import path from 'path'
 import { createServer as createViteServer } from 'vite'
 
-// Load environment variables
-dotenv.config()
+// Load environment variables from project root
+dotenv.config({ path: path.resolve(__dirname, '../../.env') })
 
 // Import routes and middleware
 import authRoutes from './routes/auth'
@@ -24,6 +24,7 @@ import adminRoutes from './routes/admin'
 import { errorHandler } from './middleware/errorHandler'
 import { rateLimiter } from './middleware/rateLimiter'
 import { authMiddleware } from './middleware/auth'
+import { apiKeyMiddleware } from './middleware/apiKey'
 
 // Import socket handlers
 import { setupSocketHandlers } from './socket'
@@ -69,6 +70,9 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
 // Rate limiting
 app.use(rateLimiter)
+
+// API key verification for all API routes
+app.use('/api', apiKeyMiddleware)
 
 // Static files
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')))
