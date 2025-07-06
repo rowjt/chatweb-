@@ -29,11 +29,9 @@ const changePasswordSchema = Joi.object({
 
 // Helper function to generate JWT token
 const generateToken = (userId: string) => {
-  return jwt.sign(
-    { userId },
-    process.env.JWT_SECRET!,
-    { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
-  )
+  const secret = process.env.JWT_SECRET || 'secret'
+  const expiresIn = process.env.JWT_EXPIRES_IN || '7d'
+  return jwt.sign({ userId }, secret, { expiresIn } as jwt.SignOptions)
 }
 
 // Register
@@ -42,7 +40,7 @@ router.post('/register', authRateLimiter, asyncHandler(async (req, res) => {
   if (error) {
     return res.status(400).json({
       success: false,
-      error: error.details[0].message
+      error: error.details?.[0]?.message || error.message
     })
   }
 
@@ -110,7 +108,7 @@ router.post('/login', authRateLimiter, asyncHandler(async (req, res) => {
   if (error) {
     return res.status(400).json({
       success: false,
-      error: error.details[0].message
+      error: error.details?.[0]?.message || error.message
     })
   }
 
@@ -192,7 +190,7 @@ router.post('/change-password', authMiddleware, asyncHandler(async (req: AuthReq
   if (error) {
     return res.status(400).json({
       success: false,
-      error: error.details[0].message
+      error: error.details?.[0]?.message || error.message
     })
   }
 

@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 COPY client/package.json ./client/package.json
 COPY server/package.json ./server/package.json
-RUN npm install
+RUN npm ci
 
 # Copy source code
 COPY . .

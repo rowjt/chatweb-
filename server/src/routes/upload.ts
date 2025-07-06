@@ -144,7 +144,7 @@ router.post('/avatar', upload.single('avatar'), async (req: Request, res: Respon
 // Delete file
 router.delete('/:filename', async (req: Request, res: Response) => {
   try {
-    const { filename } = req.params
+    const filename = req.params.filename as string
     const filePath = path.join(__dirname, '../../uploads', filename)
     
     if (fs.existsSync(filePath)) {

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
-import { Prisma } from '@prisma/client'
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 
 export interface AppError extends Error {
   statusCode?: number
@@ -20,7 +20,7 @@ export const errorHandler = (
   let code = error.code || 'INTERNAL_ERROR'
 
   // Prisma errors
-  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+  if (error instanceof PrismaClientKnownRequestError) {
     switch (error.code) {
       case 'P2002':
         statusCode = 409
