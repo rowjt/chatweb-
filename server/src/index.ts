@@ -7,6 +7,7 @@ import compression from 'compression'
 import morgan from 'morgan'
 import dotenv from 'dotenv'
 import path from 'path'
+import { createServer as createViteServer } from 'vite'
 
 // Load environment variables
 dotenv.config()
@@ -89,8 +90,25 @@ app.use('/api/messages', authMiddleware, messageRoutes)
 app.use('/api/upload', authMiddleware, uploadRoutes)
 app.use('/api/admin', authMiddleware, adminRoutes)
 
-// 404 handler
-app.use('*', (req, res) => {
+// Serve frontend in the same server
+async function setupFrontend() {
+  if (process.env.NODE_ENV === 'development') {
+    const vite = await createViteServer({
+      root: path.join(__dirname, '../../client'),
+      server: { middlewareMode: true },
+      appType: 'custom'
+    })
+    app.use(vite.middlewares)
+  } else {
+    const distPath = path.join(__dirname, '../../client/dist')
+    app.use(express.static(distPath))
+    app.get('*', (_req, res) => {
+      res.sendFile(path.join(distPath, 'index.html'))
+    })
+  }
+}
+// 404 handler for API routes
+app.use('/api/*', (req, res) => {
   res.status(404).json({
     success: false,
     error: 'Route not found'
@@ -109,6 +127,8 @@ async function startServer() {
     // Initialize database connection
     await initializeDatabase()
     console.log('Database connected successfully')
+
+    await setupFrontend()
 
     const PORT = process.env.PORT || 3001
     const HOST = process.env.HOST || 'localhost'

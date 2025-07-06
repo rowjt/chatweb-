@@ -142,19 +142,13 @@ npm run migrate
 
 5. **启动应用**
 ```bash
-# 启动后端服务 (端口3001)
-cd server
-npm run dev
-
-# 启动前端应用 (端口5173)
-cd client
+# 开发模式启动（所有功能在同一端口）
 npm run dev
 ```
 
 6. **访问应用**
-- 前端应用: http://localhost:5173
-- 后端API: http://localhost:3001
-- 管理员面板: http://localhost:5173/admin
+- 应用地址: http://localhost:3001
+- 管理员面板: http://localhost:3001/admin
 
 ## 📚 API文档
 
