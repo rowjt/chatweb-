@@ -127,6 +127,7 @@ cp .env.example .env
 
 # 编辑环境变量
 # 配置数据库连接、JWT密钥等
+# 如果未设置 `DATABASE_URL`，可使用 `DB_HOST`、`DB_PORT`、`DB_NAME`、`DB_USER`、`DB_PASSWORD` 单独配置数据库
 ```
 
 4. **数据库设置**

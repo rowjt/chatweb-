@@ -4,9 +4,18 @@ declare global {
   var __prisma: PrismaClient | undefined
 }
 
+// Resolve database connection URL
+let databaseUrl = process.env.DATABASE_URL
+if (!databaseUrl && process.env.DB_HOST && process.env.DB_PORT && process.env.DB_USER && process.env.DB_PASSWORD && process.env.DB_NAME) {
+  const { DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME } = process.env
+  const encodedPass = encodeURIComponent(DB_PASSWORD)
+  databaseUrl = `postgresql://${DB_USER}:${encodedPass}@${DB_HOST}:${DB_PORT}/${DB_NAME}`
+}
+
 // Prevent multiple instances of Prisma Client in development
 const prisma = globalThis.__prisma || new PrismaClient({
   log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+  datasources: databaseUrl ? { db: { url: databaseUrl } } : undefined,
 })
 
 if (process.env.NODE_ENV === 'development') {
