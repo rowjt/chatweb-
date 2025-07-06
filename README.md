@@ -123,8 +123,7 @@ npm install
 3. **环境配置**
 ```bash
 # 复制环境变量文件
-cp server/.env.example server/.env
-cp client/.env.example client/.env
+cp .env.example .env
 
 # 编辑环境变量
 # 配置数据库连接、JWT密钥等
@@ -149,6 +148,8 @@ npm run dev
 6. **访问应用**
 - 应用地址: http://localhost:3001
 - 管理员面板: http://localhost:3001/admin
+
+所有 API 请求需要在 `X-API-KEY` 请求头中携带在管理员面板生成的 API key。
 
 ## 📚 API文档
 

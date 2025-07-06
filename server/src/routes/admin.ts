@@ -1,14 +1,13 @@
 import { Router } from 'express'
 import { Request, Response } from 'express'
+import crypto from 'crypto'
+import { prisma } from '../config/database'
+import { adminMiddleware, AuthRequest } from '../middleware/auth'
 
 const router = Router()
 
 // Middleware to check admin permissions
-const requireAdmin = (req: Request, res: Response, next: any) => {
-  // TODO: Implement admin check
-  // For now, just pass through
-  next()
-}
+const requireAdmin = adminMiddleware
 
 // Get system statistics
 router.get('/stats', requireAdmin, async (req: Request, res: Response) => {
@@ -201,6 +200,55 @@ router.get('/logs', requireAdmin, async (req: Request, res: Response) => {
       success: false,
       error: 'Failed to get logs'
     })
+  }
+})
+
+// Create a new API key
+router.post('/api-keys', requireAdmin, async (req: AuthRequest, res: Response) => {
+  try {
+    const key = crypto.randomBytes(32).toString('hex')
+    const hashed = crypto.createHash('sha256').update(key).digest('hex')
+
+    await prisma.apiKey.create({
+      data: {
+        hashedKey: hashed,
+        ownerId: req.user?.id,
+      },
+    })
+
+    res.status(201).json({ success: true, data: { apiKey: key } })
+  } catch (error) {
+    console.error('Failed to create API key:', error)
+    res.status(500).json({ success: false, error: 'Failed to create API key' })
+  }
+})
+
+// List API keys
+router.get('/api-keys', requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const keys = await prisma.apiKey.findMany({
+      where: { ownerId: (req as AuthRequest).user?.id },
+      select: { id: true, createdAt: true, revoked: true },
+    })
+    res.json({ success: true, data: keys })
+  } catch (error) {
+    console.error('Failed to list API keys:', error)
+    res.status(500).json({ success: false, error: 'Failed to list API keys' })
+  }
+})
+
+// Revoke API key
+router.delete('/api-keys/:id', requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params
+    if (!id) {
+      return res.status(400).json({ success: false, error: 'ID required' })
+    }
+    await prisma.apiKey.update({ where: { id }, data: { revoked: true } })
+    res.json({ success: true })
+  } catch (error) {
+    console.error('Failed to revoke API key:', error)
+    res.status(500).json({ success: false, error: 'Failed to revoke API key' })
   }
 })
 

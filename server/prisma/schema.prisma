@@ -32,8 +32,20 @@ model User {
   ownedGroups      Group[]             @relation("GroupOwner")
   notifications    Notification[]
   userSessions     UserSession[]
+  apiKeys          ApiKey[]
 
   @@map("users")
+}
+
+model ApiKey {
+  id        String   @id @default(cuid())
+  hashedKey String   @unique
+  createdAt DateTime @default(now())
+  revoked   Boolean  @default(false)
+  ownerId   String?
+  owner     User?    @relation(fields: [ownerId], references: [id])
+
+  @@map("api_keys")
 }
 
 model Chat {
